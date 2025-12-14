@@ -10,3 +10,10 @@ export const GeneratePassword = async (
 ): Promise<string> => {
   return await bcrypt.hash(password, salt);
 };
+
+export const ValidatePassword = async (
+  enteredPassword: string,
+  savedPassword: string
+): Promise<boolean> => {
+  return await bcrypt.compare(enteredPassword, savedPassword);
+};
