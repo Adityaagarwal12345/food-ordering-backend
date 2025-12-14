@@ -31,9 +31,19 @@ const VendorSchema = new Schema<VendorDoc>(
     coverImages: { type: [String], default: [] },
     rating: { type: Number, default: 0 },
     foods: [{ type: Schema.Types.ObjectId, ref: "Food" }]
-  },
-  { timestamps: true }
-);
+  },{
+    toJSON:{
+      transform(doc,ret:any){
+        delete ret.password;
+        delete ret.salt;
+        delete ret.__v;
+        delete ret.createdAt;
+        delete ret.updatedAt;
+      }
+    },
+  
+   timestamps: true 
+  });
 
 export const Vendor: Model<VendorDoc> =
   mongoose.model<VendorDoc>("Vendor", VendorSchema);
