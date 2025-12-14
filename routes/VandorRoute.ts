@@ -4,6 +4,10 @@ const router = express.Router();
 
 router.post('/login',VandorLogin);
 
+
+router.get('/profile')
+router.patch('/profile')
+router.patch('/service')
 router.get("/", (req:Request, res:Response,next:NextFunction) => {
  
   res.json({message:"Vendor Route is working 🚀"});
