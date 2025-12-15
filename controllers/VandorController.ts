@@ -3,6 +3,8 @@ import { FindVendor } from "./AdminControllers.js";
 import type { VandorLoginInput } from "../dto/Vandor.dto.js";
 import { GenerateSignature,ValidatePassword } from "../utility/PasswordUtility.js";
 import type { EditVandorInput } from "../dto/Vandor.dto.js";
+import { Food } from "../models/Food.js";
+import type { CreateFoodInput } from "../dto/Food.dto.js";
 
 export const VandorLogin = async (
   req: Request,
@@ -56,18 +58,21 @@ export const GetVandorProfile = async (
   res: Response,
   next: NextFunction
 ) => {
-  try {
-    const vandorId = req.params.id;
+  const user = req.user;
 
-    const existingVandor = await FindVendor(vandorId);
-    if (!existingVandor) {
-      return res.status(404).json({ message: "Vendor not found" });
-    }
-    return res.status(200).json(existingVandor);
-  } catch (error) {
-    next(error);
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
+
+  const existingVendor = await FindVendor(user._id);
+
+  if (!existingVendor) {
+    return res.status(404).json({ message: "Vendor not found" });
+  }
+
+  return res.status(200).json(existingVendor);
 };
+
 
 
 export const UpdateVandorProfile = async (
@@ -134,3 +139,59 @@ export const UpdateVandorService = async (
     next(error);
   }
 };
+
+export const AddFood = async (req: Request, res: Response, next: NextFunction) => {
+    console.log("REQ BODY =>", req.body);
+    console.log("REQ FILES =>", req.files);
+    const user = req.user;
+
+    const { name, description, category, foodType, readyTime, price } = <CreateFoodInput>req.body;
+     
+    if(user){
+
+       const vendor = await FindVendor(user._id);
+
+       if(vendor !== null){
+
+        const files = req.files as Express.Multer.File[]|undefined;
+        const images = files?files.map((file) => file.filename):[];
+
+           
+            
+            const food = await Food.create({
+                vendorId: vendor._id,
+                name: name,
+                description: description,
+                category: category,
+                price: price,
+                rating: 0,
+                readyTime: readyTime,
+                foodType: foodType,
+                images: images
+            })
+            
+            vendor.foods.push(food._id);
+
+            const result = await vendor.save();
+            return res.json(result);
+       }
+
+    }
+    return res.status(400).json({ message: "Unable to add food" });
+
+}
+
+export const GetFoods = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+ 
+    if(user){
+
+       const foods = await Food.find({ vendorId: user._id});
+
+       if(foods !== null){
+            return res.json(foods);
+       }
+
+    }
+    return res.json({'message': 'Foods not found!'})
+}

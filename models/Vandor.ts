@@ -30,7 +30,9 @@ const VendorSchema = new Schema<VendorDoc>(
     serviceAvailable: { type: Boolean, default: false },
     coverImages: { type: [String], default: [] },
     rating: { type: Number, default: 0 },
-    foods: [{ type: Schema.Types.ObjectId, ref: "Food" }]
+    foods: [{ type: Schema.Types.ObjectId,
+       ref: "Food"
+       }]
   },{
     toJSON:{
       transform(doc,ret:any){

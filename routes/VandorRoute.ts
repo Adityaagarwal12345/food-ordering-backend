@@ -1,22 +1,47 @@
-import express, { Request,Response,NextFunction } from "express";
-import { VandorLogin
-  ,GetVandorProfile,
+import express, { Request, Response, NextFunction } from "express";
+import {
+  AddFood,
+  GetFoods,
+  VandorLogin,
+  GetVandorProfile,
   UpdateVandorProfile,
-  UpdateVandorService} 
-  from "../controllers/VandorController.js";
+  UpdateVandorService
+} from "../controllers/VandorController.js";
 import { Authenticate } from "../middlewares/CommanAuth.js";
+import { images } from "../middlewares/ImageUpload.js";
+
+import multer from "multer";
+
 const router = express.Router();
 
-router.post('/login',VandorLogin);
+/* 🔹 Multer Storage Config */
+const imageStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "images");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
 
+/* 🔹 Multer Middleware */
+const images = multer({ storage: imageStorage }).array("images", 10);
 
-router.get('/profile',Authenticate,GetVandorProfile)
-router.patch('/profile',Authenticate,UpdateVandorProfile);
-router.patch('/service'   ,Authenticate,UpdateVandorService);
-router.get("/", (req:Request, res:Response,next:NextFunction) => {
- 
-  res.json({message:"Vendor Route is working 🚀"});
+/* 🔹 Auth Routes */
+router.post("/login", VandorLogin);
 
+/* 🔹 Vendor Profile Routes */
+router.get("/profile", Authenticate, GetVandorProfile);
+router.patch("/profile", Authenticate, UpdateVandorProfile);
+router.patch("/service", Authenticate, UpdateVandorService);
+
+/* 🔹 Food Routes */
+router.post("/food", Authenticate, images, AddFood);
+router.get("/food", Authenticate, GetFoods);
+
+/* 🔹 Test Route */
+router.get("/", (req: Request, res: Response, next: NextFunction) => {
+  res.json({ message: "Vendor Route is working 🚀" });
 });
 
 export { router as VandorRoute };

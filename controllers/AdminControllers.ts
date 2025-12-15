@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import type { CreateVandorInput } from "../dto/Vandor.dto.js";
 import { Vendor } from "../models/index.js";
 import { GenerateSalt, GeneratePassword } from "../utility/PasswordUtility.js";
+import mongoose from "mongoose";
 
 export const FindVendor = async (
   id?: string,
@@ -10,11 +11,16 @@ export const FindVendor = async (
   if (email) {
     return await Vendor.findOne({ email });
   }
+
   if (id) {
-    return await Vendor.findById(id);
+    return await Vendor.findById(
+      new mongoose.Types.ObjectId(id)
+    );
   }
+
   return null;
 };
+
 
 export const CreateVandor = async (
   req: Request,
