@@ -104,20 +104,31 @@ export const UpdateVandorProfile = async (
     next(error);
   }
 };
+
 export const UpdateVandorService = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const vandorId = req.params.id;
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized access" });
+    }
+
     const { serviceAvailable } = req.body;
-    const existingVandor = await FindVendor(vandorId);
+
+    const existingVandor = await FindVendor(user._id);
+
     if (!existingVandor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
+
     existingVandor.serviceAvailable = serviceAvailable;
+
     const updatedVandor = await existingVandor.save();
+
     return res.status(200).json(updatedVandor);
   } catch (error) {
     next(error);
