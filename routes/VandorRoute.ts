@@ -5,10 +5,10 @@ import {
   VandorLogin,
   GetVandorProfile,
   UpdateVandorProfile,
-  UpdateVandorService
+  UpdateVandorService,
+  UpdateVandorCoverImage
 } from "../controllers/VandorController.js";
 import { Authenticate } from "../middlewares/CommanAuth.js";
-import { images } from "../middlewares/ImageUpload.js";
 
 import multer from "multer";
 
@@ -33,6 +33,7 @@ router.post("/login", VandorLogin);
 /* 🔹 Vendor Profile Routes */
 router.get("/profile", Authenticate, GetVandorProfile);
 router.patch("/profile", Authenticate, UpdateVandorProfile);
+router.patch("/coverimage", Authenticate,images, UpdateVandorCoverImage);
 router.patch("/service", Authenticate, UpdateVandorService);
 
 /* 🔹 Food Routes */

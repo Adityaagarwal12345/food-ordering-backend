@@ -110,6 +110,33 @@ export const UpdateVandorProfile = async (
   }
 };
 
+export const UpdateVandorCoverImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => { const user = req.user;
+
+    
+     
+    if(user){
+
+       const vendor = await FindVendor(user._id);
+
+       if(vendor !== null){
+
+        const files = req.files as Express.Multer.File[]|undefined;
+        const images = files?files.map((file) => file.filename):[];
+
+            vendor.coverImages.push(...images);  
+
+            const result = await vendor.save();
+            return res.json(result);
+       }
+
+    }
+    return res.status(400).json({ message: "Unable to add food" });
+
+};
 export const UpdateVandorService = async (
   req: Request,
   res: Response,
