@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { FindVendor } from "./AdminControllers.js";
 import type { VandorLoginInput } from "../dto/Vandor.dto.js";
 import { GenerateSignature,ValidatePassword } from "../utility/PasswordUtility.js";
-
+import type { EditVandorInput } from "../dto/Vandor.dto.js";
 
 export const VandorLogin = async (
   req: Request,
@@ -69,20 +69,36 @@ export const GetVandorProfile = async (
   }
 };
 
+
 export const UpdateVandorProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const vandorId = req.params.id;
-    const updateData = req.body;
-    const existingVandor = await FindVendor(vandorId);
+    const { foodType, name, address, phone } =
+      req.body as EditVandorInput;
+
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized access" });
+    }
+
+    const existingVandor = await FindVendor(user._id);
+
     if (!existingVandor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    Object.assign(existingVandor, updateData);
+
+    // Update only provided fields
+    existingVandor.name = name ?? existingVandor.name;
+    existingVandor.address = address ?? existingVandor.address;
+    existingVandor.phone = phone ?? existingVandor.phone;
+    existingVandor.foodType = foodType ?? existingVandor.foodType;
+
     const updatedVandor = await existingVandor.save();
+
     return res.status(200).json(updatedVandor);
   } catch (error) {
     next(error);
